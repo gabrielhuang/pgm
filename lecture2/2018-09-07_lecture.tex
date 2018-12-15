@@ -1,0 +1,203 @@
+\documentclass[12pt]{report}
+\usepackage{graphicx}
+\usepackage{scribe_MG}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage[mathscr]{eucal}
+\usepackage[english]{babel}
+\usepackage[utf8]{inputenc}  %encodage du fichier
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{epstopdf}
+\usepackage{array}
+
+\usepackage{placeins}
+
+%% Kanika
+\usepackage[colorlinks]{hyperref} % for links
+\usepackage{xcolor}             % for color
+\usepackage{caption}            % for caption* (without 'Figure 2.n:')
+\usepackage{float}              % for H, to place figure HERE!
+\usepackage{wrapfig}
+\usepackage{tikz}
+\usetikzlibrary{arrows}
+\usetikzlibrary{positioning}
+
+\usepackage{bbm}            % for the indicator function symbol : \mathbbm{1}
+\def\R{\mathbb{R}}
+\newcommand{\defobj}[1]{\color{red}#1\color{black}{}}
+\newcommand{\defmean}[1]{\color{green!70!black}#1\color{black}{}}
+\renewcommand{\emph}[1]{\color{violet}#1\color{black}{}}
+\DeclareMathOperator{\E}{\mathbb{E}}
+
+\newcommand{\sigmaField}{\mathcal{E}}
+
+%% For footnote horizontal spacing :
+%% \usepackage{footmisc}
+%% \setlength{\footnotemargin}{2mm}
+
+\newcommand\independent{\protect\mathpalette{\protect\independenT}{\perp}}
+\def\independenT#1#2{\mathrel{\rlap{$#1#2$}\mkern2mu{#1#2}}} 
+
+\newcommand{\indep}{\ensuremath{\,\bot\!\!\!\bot\,}} %% The symbol for independent
+\newcommand{\notindep}{\indep\!\!\!\!\!/\,\,\,}
+
+\newtheorem{remark}{Remark}[section]
+\newtheorem{example}{Example}[section]
+\newtheorem{property}{Property}[section]
+
+
+\begin{document}
+\coursetitle{IFT 6269: Probabilistic Graphical Models}
+\semester{Fall 2018}
+\lecturer{Simon Lacoste-Julien} \scribe{Kanika Madan}
+\lecturenumber{2} \lecturedate{September 7, 2018}
+
+\maketitle
+
+\textbf{Disclaimer:} These notes have only been lightly proofread.
+
+\section{Probability review}
+
+\subsection{Motivation}
+
+\textbf{Question :} Why do we use need to use probability?\\
+\noindent\textbf{Answer :} Probability provides a principled framework to model \emph{uncertainty}.\\
+
+\noindent\textbf{Question :} What are the sources of uncertainty?\\
+\noindent\textbf{Answer :} Several sources of uncertainty could be:
+\begin{enumerate}
+\item Intrinsic uncertainty: an uncertainty which is built into the system. For example, in quantum mechanics.
+\item Uncertainty due to partial information or partial observations. For example:
+\begin{enumerate} \item In card games, the information and observations might not be complete.
+    \item In rolling a die, the initial conditions might not be known.
+  \end{enumerate}
+\item Uncertainty due to incomplete modeling of a complex phenomenon. This could also be due to computation issues. For example, a rule such as "most birds can fly" has an advantage of being a simple rule, but it also yields uncertainty.
+  
+\end{enumerate}
+
+\subsection{Notation}
+
+A review of some of the commonly used notation:
+
+Random variables will be noted $X_1, X_2, X_3, \dots$ or $X, Y, Z, \dots$ and are usually real-valued. \\
+\vskip .1cm
+The \emph{realizations} of these random variables are often denoted by small letters: $x_1, x_2, x_3, ... $ (or $x, y, z, ... $) and are the values that the respective random variables can take. \emph{If X is a random variable, then it represents an uncertain quantity}. $X=x$ represents that random variable $X$ takes value $x$.
+
+\newpage
+\subsubsection{Formally}
+Let us define $\Omega$ a sample space of \emph{elementary events}, $\{\omega_1, \omega_2, \omega_3, \dots\}$\footnote{temporarily assumed to be a countable set}. The sample space represents the \defmean{possible values of a given random variable}.
+\vskip .2cm
+For example, let $X$ be the result of a die throw, then $\Omega$ = $\{1, 2, 3, 4, 5, 6\}$.
+\vskip .2cm
+
+There are two types of random variables:
+\begin{enumerate}
+\item Discrete Random Variable: when $\Omega$ is countable
+\item Continuous Random Variable: when $\Omega$ is uncountable
+\end{enumerate}
+
+If we assume that $\Omega$ is countable, then a random variable $X$ is characterized by a probability mass function \emph{pmf}, which is defined as:
+
+\defmean{\[ p(x) \ \forall x \in \Omega \triangleq 
+\left\{
+\begin{array}{ll}
+  p(x) \geq 0 \  	\forall x \\
+  \displaystyle\Sigma_{x \in \Omega} p(x) = 1
+\end{array}
+\right.
+\]}
+
+
+
+A \defobj{probability distribution} \emph{P} is a \defmean{mapping $P: \sigmaField\mapsto[0,1]$} where $\sigmaField$ is the set of all subsets of $\Omega$, i.e. the set of \emph{events} (i.e. $2^{\Omega}$,
+i.e. a $\sigma$-field\footnote{the \href{https://en.wikipedia.org/wiki/Sigma-algebra}{$\sigma$-field formalism} is \href{http://math.stackexchange.com/a/683941/44171}{necessary} when $\Omega$ is uncountable, which happens as soon as we consider a continuous random variable.}) ;
+such that:
+\defmean{
+  \begin{displaymath}
+    \left.
+  \begin{array}{ll}
+  %% \item
+    - P(E) \ge 0 \quad \forall E \in \sigmaField\\
+  %% \item
+    - P(\Omega) = 1\\
+    %% \item
+    - P(\displaystyle\bigcup_{i=1}^{\infty} E_{i}) = \sum_{i=1}^{\infty}(E_{i}) \quad \text{when $E_1, E_2, \dots$ are disjoint.}
+    \end{array}
+  \right\} \emph{\text{Kolmogorov axioms}}
+  \end{displaymath}
+  %  \footnote{These conditions - that a meaningful probability distribution must follow - are called the }
+}
+
+A continuous random variable is characterized by a \defobj{probability density function} \emph{p, pdf} such that:
+
+\[ \left\{\begin{array}{ll}
+p(x) \ge 0 \text{ } \forall x \in \Omega\\
+\text{p is integrable and } \displaystyle\int_{\Omega} p(x) = 1
+\end{array}\right.\]
+\\
+For continuous random variable, we have: for $\Omega \in \R$ : $ P([a, b]) = \displaystyle\int_{a}^{b} p(x) $ \\ \\
+
+Notation: for a random variable, we write as: $p_X(x)$ to denote random variable $X$ taking value $x$, and $P_Y(y)$ to denote random variable $Y$ taking value $y$. Also, $P_Y(y) = P_Y(x)$ when $x=y$
+
+
+\newpage
+
+Recap: \\
+
+\hspace For discrete random variable X, pmf $p(x) \leftrightarrow  P\{X = x\} = p(x) $ \\ \\
+\hspace*{5mm} For continuous random variable X, pdf $p(x) \leftrightarrow P\{ X \in x \pm \frac{dx}{2} = p(x) dx $  \\
+
+\hspace*{82mm}  $P\{ X \in x \pm \frac{a}{2} } = \displaystyle\int_{x - \frac{a}{2}}^ {x + \frac{a}{2}} p(u) du $ 
+
+
+\subsection{Other random variable basics}
+
+\subsubsection{Joint random variable}
+Let \emph{$Z = (X,Y) $} be a joint random variable defined over $\Omega_Z \triangleq \Omega_X \times  \Omega_Y $. Then the pmf of $Z$ is the \defobj{"joint pmf"} \emph{on X and Y} such that $p(x, y) = P\{X=x, Y=y\}$. This is called \defobj{joint distribution}. \\
+
+For example, in a die roll, let $X$ be the result of the die roll as an even number, and $Y$ be the result of the die roll as an odd number. Then we can represent the elementary events of $\Omega_{(X, Y)}$ as the following table: \\
+
+\begin{center} % \centering
+\begin{tabular}{l|ll}
+  & $X=0$ & $X=1$ \\ \hline
+  $Y=0$ & 0   & $\frac{1}{2}$ \\
+  $Y=1$ & $\frac{1}{2}$ & 0  
+\end{tabular}
+\end{center}
+
+If $X$ and $Y$ are continuous, then $P\{box\} = \displaystyle\int_{box} p(x, y)dx dy$.
+
+\subsubsection{Marginal Distribution}
+\emph{(Defined in the context of joint distribution)}\\ \\
+\defobj{Marginal distribution} is a \defmean{distribution of a component of a random vector}. \\
+
+\hspace*{20mm}$P\{X = x\} = \Sigma_{y \in \Omega_Y} P\{X = x, Y= y \} = \Sigma_{y \in \Omega_Y} P(x,y)$. \\ \\ This is called \defobj{marginalizing out Y}.
+
+\subsubsection{Independence}
+\emph{$X$ is} \defobj{independent} \emph{of $Y$} \Leftrightarrow \  $p(x, y) = p(x) p(y) \ \forall \ (x,y) \in \Omega_X \times \Omega_Y $. \emph{Independence is denoted as: $X \independent Y$}.
+
+Random variables $x_1, x_2, ... , $ are \defobj{mutually independent} \ 	\Leftrightarrow \  $p(x_1, x_2, \dots, \x_n) = \prod_{i=1}^{n} p(x_i), \ \forall x_{1:n} \in \times_{i=1}^{n} \Omega_{X_i}$.
+
+
+\newpage
+
+\subsection{Conditioning}
+For events $A$ and $B$, suppose that $P(B) \neq 0$. We define the
+\defobj{probability of $A$ given $B$}, \defmean{\[P(A|B) \triangleq \frac{P(A
+    \cap B) }{P(B)}\]}
+
+In terms of sample space, that means we look at the subspace where $B$ happens,
+and in that space, we look at the subspace where $A$ also happens. \\
+
+For discrete random variables $X$ and $Y$, \emph{conditional pmf} is defined as:
+\[p(x|y) \triangleq P(X=x| Y=y) \triangleq \frac{P(X=x, Y=y)}{P(Y=y)}\]
+where $P(Y=y) = \sum_{x}P(X=x,Y=y)$ is a \emph{normalization constant} and also a marginal pmf, necessary in order to get a real probability distribution. ${P(X=x, Y=y)$ is the joint pmf. \\
+
+For continuous random variables $X$ and $Y$, \emph{conditional pmf} is defined as:
+\[p(x|y) \triangleq \frac{p(x, y)}{p(y)}\]
+where $p(y)$ is the probability density.  \\
+
+It is always true, with the subtle point that $p(x|y)$ is undefined if $p(y) = 0$.
+
+\end{document}
